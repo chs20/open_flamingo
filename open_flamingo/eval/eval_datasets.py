@@ -26,7 +26,9 @@ class COCOFlickrDataset(Dataset):
         if self.is_flickr:
             return f"{self.image_dir_path}/{self.annotations[idx]['image_id']}.jpg"
         else:
-            return f"{self.image_dir_path}/COCO_train2014_{self.annotations[idx]['image_id']:012d}.jpg"
+            # prefix = 'COCO_train2014_'
+            prefix = ''
+            return f"{self.image_dir_path}/{prefix}{self.annotations[idx]['image_id']:012d}.jpg"
 
     def __getitem__(self, idx):
         image = Image.open(self.get_img_path(idx))

@@ -149,10 +149,10 @@ class Flamingo(nn.Module):
         Returns:
             torch.Tensor: lang_x with generated tokens appended to it
         """
-        if num_beams > 1:
-            vision_x = vision_x.repeat_interleave(num_beams, dim=0)
 
         if not use_cached_vision_x:
+            if num_beams > 1:
+                vision_x = vision_x.repeat_interleave(num_beams, dim=0)
             self._encode_vision_x(vision_x=vision_x)
         else:
             # Case: use cached; vision_x should be cached and other

@@ -197,7 +197,8 @@ class VQA:
             qaAnn = self.qa[quesId]
             ann["image_id"] = qaAnn["image_id"]
             ann["question_type"] = qaAnn["question_type"]
-            ann["answer_type"] = qaAnn["answer_type"]
+            if "answer_type" in ann:
+                ann["answer_type"] = qaAnn["answer_type"]
         print(
             "DONE (t=%0.2fs)" % ((datetime.datetime.utcnow() - time_t).total_seconds())
         )

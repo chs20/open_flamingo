@@ -57,7 +57,6 @@ def map_keys(model, pretrained_ckpt_loc):
                 self.stages[j][k].pwconv2.bias.copy_(ckpt[f'stages.{j}.{k}.pwconv2.bias'])
 
 
-
 class ClipVisionModel(torch.nn.Module):
     def __init__(self, model, normalize, all_tokens=False, proj=True):
         super().__init__()
@@ -203,16 +202,18 @@ def load_pretrained_model(model_path, model_base, model_name, pretrained_rob_pat
 
 
         ####.    for the pre-trained stuff - until next set of hashes
-        robust_finetuned = False
-        if pretrained_rob_path is not None:
-            robust_finetuned = True
+        robust_finetuned = True
+        if pretrained_rob_path == 'openai':
+            robust_finetuned = False
 
-        if robust_finetuned:
+        if pretrained_rob_path is not None:
             # pretrained_rob_path = "/data/naman_deep_singh/project_multimodal/clip-finetune/sbatch/ViT-L-14_openai_imagenet_txtSup_False_vit-l-unsup-clean-0p1-eps4-3adv-lr1e-4-wd-1e-3_f8o0v/checkpoints/final.pt"
             import open_clip
-            model_orig, _, image_processor = open_clip.create_model_and_transforms('ViT-L-14')
+            model_orig, _, image_processor = open_clip.create_model_and_transforms('ViT-L-14', pretrained='openai')
             vision_model = model_orig.visual
-            vision_model.load_state_dict(torch.load(pretrained_rob_path, map_location='cpu'))
+            if robust_finetuned:
+                vision_model.load_state_dict(torch.load(pretrained_rob_path, map_location='cpu'))
+
             normalize = image_processor.transforms[-1]
             model_orig = ClipVisionModel(model=vision_model, normalize=normalize, all_tokens=True, proj=True)
             vision_tower.vision_tower.vision_model = model_orig

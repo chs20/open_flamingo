@@ -101,6 +101,7 @@ def load_pretrained_model(model_path, model_base, model_name, pretrained_rob_pat
     else:
         kwargs['torch_dtype'] = torch.float16
 
+
     if 'llava' in model_name.lower():
         # Load LLaVA model
         if 'lora' in model_name.lower() and model_base is None:
@@ -197,29 +198,12 @@ def load_pretrained_model(model_path, model_base, model_name, pretrained_rob_pat
         model.resize_token_embeddings(len(tokenizer))
 
         vision_tower = model.get_vision_tower()
+        # vision_tower.set_device(device)
+        non_llava = True if pretrained_rob_path is not None else False
         if not vision_tower.is_loaded:
-            vision_tower.load_model()
+            vision_tower.load_model(non_llava, pretrained_rob_path, device=device) #.to(device=device)
 
-
-        ####.    for the pre-trained stuff - until next set of hashes
-        robust_finetuned = True
-        if pretrained_rob_path == 'openai':
-            robust_finetuned = False
-
-        if pretrained_rob_path is not None:
-            # pretrained_rob_path = "/data/naman_deep_singh/project_multimodal/clip-finetune/sbatch/ViT-L-14_openai_imagenet_txtSup_False_vit-l-unsup-clean-0p1-eps4-3adv-lr1e-4-wd-1e-3_f8o0v/checkpoints/final.pt"
-            import open_clip
-            model_orig, _, image_processor = open_clip.create_model_and_transforms('ViT-L-14', pretrained='openai')
-            vision_model = model_orig.visual
-            if robust_finetuned:
-                vision_model.load_state_dict(torch.load(pretrained_rob_path, map_location='cpu'))
-
-            normalize = image_processor.transforms[-1]
-            model_orig = ClipVisionModel(model=vision_model, normalize=normalize, all_tokens=True, proj=True)
-            vision_tower.vision_tower.vision_model = model_orig
-        #########    
-
-        print(vision_tower.vision_tower)
+        # print(vision_tower.vision_tower)
         vision_tower.to(device=device, dtype=torch.float16)
         image_processor = vision_tower.image_processor
 

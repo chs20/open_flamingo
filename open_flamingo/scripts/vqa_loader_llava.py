@@ -74,9 +74,16 @@ def eval_model(args):
     disable_torch_init()
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
+    
+    # if not args.pretrained_rob_path:
+    #    todo add assert here, to check only 336 input is allowed when llava-original model
+    
     model, image_processor, tokenizer, context_len = load_pretrained_model(model_path, args.model_base, model_name, pretrained_rob_path=args.pretrained_rob_path)
-
-
+    # print(model.transformer())
+    model.to('cuda')
+    rand_input = torch.rand((1, 3, 224, 224), dtype=torch.half) #.to('cuda')
+    op = model.get_model().get_vision_tower()(rand_input)
+    print(op.size())
     exit()
 
     questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")]
@@ -132,7 +139,7 @@ def eval_model(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="liuhaotian/llava-v1.5-7b")
-    parser.add_argument("--pretrained_rob_path", type=str, default=None, help='Pass None, openai or path-to-rob-ckpt')
+    parser.add_argument("--pretrained_rob_path", type=str, default='openai', help='Pass None, openai or path-to-rob-ckpt')
         # "/data/naman_deep_singh/project_multimodal/clip-finetune/sbatch/ViT-L-14_openai_imagenet_txtSup_False_vit-l-unsup-clean-0p1-eps4-3adv-lr1e-4-wd-1e-3_f8o0v/checkpoints/final.pt")
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--image-folder", type=str, default="")

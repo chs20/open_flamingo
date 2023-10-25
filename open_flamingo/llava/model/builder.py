@@ -203,7 +203,7 @@ def load_pretrained_model(model_path, model_base, model_name, pretrained_rob_pat
 
         ####.    for the pre-trained stuff - until next set of hashes
         robust_finetuned = True
-        if pretrained_rob_path != 'open-ai':
+        if pretrained_rob_path == 'openai':
             robust_finetuned = False
 
         if pretrained_rob_path is not None:
